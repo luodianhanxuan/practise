@@ -4,10 +4,8 @@ import com.wangjg.outbox.constant.OutboxMessageStatus;
 import com.wangjg.outbox.db.entity.Outbox;
 import com.wangjg.outbox.exception.OutboxException;
 import org.springframework.util.CollectionUtils;
-import org.teasoft.bee.osql.Condition;
-import org.teasoft.bee.osql.Op;
-import org.teasoft.bee.osql.OrderType;
-import org.teasoft.bee.osql.Suid;
+import org.springframework.util.StringUtils;
+import org.teasoft.bee.osql.*;
 import org.teasoft.honey.osql.core.ConditionImpl;
 import org.teasoft.honey.util.ObjectUtils;
 
@@ -20,9 +18,11 @@ import java.util.stream.Collectors;
 public class OutboxRepository {
 
     private final Suid suid;
+    private final SuidRich suidRich;
 
-    public OutboxRepository(Suid suid) {
+    public OutboxRepository(Suid suid, SuidRich suidRich) {
         this.suid = suid;
+        this.suidRich = suidRich;
     }
 
     public List<Long> toSendIdsOfReferSceneType(String sceneType) {
@@ -83,12 +83,12 @@ public class OutboxRepository {
 
     public List<Outbox> listForOutBoxByIds(List<Long> ids) {
         Condition condition = new ConditionImpl();
-        condition.op("id", Op.in, ids);
+        condition.op("id", Op.in, StringUtils.collectionToCommaDelimitedString(ids));
         return suid.select(new Outbox(), condition);
     }
 
     public void insert(Outbox outbox) {
-        long id = suid.insertAndReturnId(outbox);
+        long id = suidRich.insert(outbox);
         if (id > 0) {
             outbox.setId(id);
         } else {

@@ -146,17 +146,17 @@ public class OutboxDto {
         private String extend;
 
         public OutboxDto build() {
-            if (isEmpty(sceneType)) {
-                throw new OutboxException("业务场景类型不能为空");
+            if (isEmpty(getSceneType())) {
+                throw new OutboxException("业务场景不能为空");
             }
-            if (isEmpty(businessCode)) {
-                throw new OutboxException("业务场景代码不能为空");
-            }
-            if (isEmpty(requestId)) {
-                throw new OutboxException("通知任务请求编号不能为空");
-            }
-            if (isEmpty(sendMethod)) {
+            if (isEmpty(getSendMethod())) {
                 throw new OutboxException("发送方式不能为空");
+            }
+            if (isEmpty(getBusinessCode())) {
+                throw new OutboxException("业务代码不能为空");
+            }
+            if (isEmpty(getRequestId())) {
+                throw new OutboxException("请求编号不能为空");
             }
 
             OutboxDto retVal = new OutboxDto();

@@ -17,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -115,13 +116,20 @@ public class DeliveryTask implements Runnable {
                     // 加锁
                     SyncHelper.OUTBOX_STRING_POOL.sync(toSend.getSceneType() + "_" + toSend.getRequestId() + "_" + toSend.getSendMethod(), () -> {
                         try {
-                            MessageBrokerIdentifier messageBrokerIdentifier = new MessageBrokerIdentifier();
-                            messageBrokerIdentifier.setSceneType(toSend.getSceneType());
-                            messageBrokerIdentifier.setSendMethod(toSend.getSendMethod());
+                            MessageBrokerIdentifier brokerIdentifier = new MessageBrokerIdentifier();
+                            brokerIdentifier.setSceneType(toSend.getSceneType());
+                            brokerIdentifier.setSendMethod(toSend.getSendMethod());
+                            brokerIdentifier.setBusinessCode(toSend.getBusinessCode());
 
-                            MessageBroker handler = messageBrokerFactory.getBroker(messageBrokerIdentifier);
+                            MessageBroker handler = messageBrokerFactory.getBroker(brokerIdentifier);
+
+                            if (handler == null) {
+                                log.error("没有找到成功消息处理器：className : {}", JSON.toJSONString(brokerIdentifier));
+                                return;
+                            }
                             OutboxDto dto = new OutboxDto();
                             BeanUtils.copyProperties(toSend, dto);
+                            dto.setRetryInterval(Duration.parse(toSend.getRetryInterval()));
                             handler.deliverMessageAndUpdateStatus(toSend, dto);
                         } catch (Exception e) {
                             log.error(String.format("outbox < %s > 发送异常 ：exclusive: %s, sceneType : %s, exclusionSceneTypes: %s ",

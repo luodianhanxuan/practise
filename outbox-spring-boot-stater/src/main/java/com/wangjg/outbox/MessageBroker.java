@@ -13,12 +13,14 @@ import com.wangjg.outbox.exception.OutboxException;
 import com.wangjg.outbox.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.teasoft.bee.distribution.GenId;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -35,22 +37,26 @@ import static org.springframework.util.ObjectUtils.isEmpty;
  * 消处理器抽象模板
  */
 @Slf4j
-public abstract class MessageBroker implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+public abstract class MessageBroker implements ApplicationContextAware, InitializingBean {
 
-    private final OutboxRepository outboxRepository;
+    private OutboxRepository outboxRepository;
 
-    private final OutboxProperties outboxProperties;
+    private OutboxProperties outboxProperties;
 
     private ApplicationContext applicationContext;
 
-    public MessageBroker() {
-        outboxRepository = applicationContext.getBean(OutboxRepository.class);
-        outboxProperties = applicationContext.getBean(OutboxProperties.class);
+    private GenId genId;
+
+    @Override
+    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
     @Override
-    public void initialize(@NonNull ConfigurableApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+    public void afterPropertiesSet() throws Exception {
+        genId = applicationContext.getBean(GenId.class);
+        outboxRepository = applicationContext.getBean(OutboxRepository.class);
+        outboxProperties = applicationContext.getBean(OutboxProperties.class);
     }
 
     /**
@@ -62,17 +68,20 @@ public abstract class MessageBroker implements ApplicationContextInitializer<Con
                 Thread thread = new Thread(r);
                 thread.setName("outboxMessageHandlerThread");
                 //设置异常捕获器
-                thread.setUncaughtExceptionHandler((t, e) -> log.error(String.format("消息投递发送异常 e: %s", e.getMessage())));
+                thread.setUncaughtExceptionHandler((t, e) -> log.error(String.format("消息投递发送异常: %s", e.getMessage()), e));
                 return thread;
             }, new ThreadPoolExecutor.AbortPolicy());
 
-    protected abstract List<MessageBrokerIdentifier> getBrokerIdentifier();
+    /**
+     * 消息处理器ID，用于
+     */
+    protected abstract List<MessageBrokerIdentifier> getIdentifier();
+
 
     /**
      * 投递消息 方式可以是:(1)异步 MQ / (2)同步: http，在此方法内真正发起请求
      */
     protected abstract void doDeliverMessage(OutboxRequestDto reqDTO) throws OutboxException;
-
 
     /**
      * 模板-投递消息 加事务
@@ -86,12 +95,13 @@ public abstract class MessageBroker implements ApplicationContextInitializer<Con
 
         Outbox outbox = new Outbox();
         BeanUtils.copyProperties(reqDTO, outbox);
-
+        outbox.setId(genId.get());
         outbox.setRetryInterval(reqDTO.getRetryInterval().toString());
 
         Date now = new Date();
         outbox.setCreateAt(now);
         outbox.setUpdateAt(now);
+        outbox.setSendStatus(OutboxMessageStatus.SENDING.getType());
 
         // 参数校验
         // 填充缺省参数
@@ -119,14 +129,14 @@ public abstract class MessageBroker implements ApplicationContextInitializer<Con
         if (isEmpty(dto.getSceneType())) {
             throw new OutboxException("业务场景类型不能为空");
         }
+        if (isEmpty(dto.getSendMethod())) {
+            throw new OutboxException("发送方式不能为空");
+        }
         if (isEmpty(dto.getBusinessCode())) {
             throw new OutboxException("业务场景代码不能为空");
         }
         if (isEmpty(dto.getRequestId())) {
             throw new OutboxException("通知任务请求编号不能为空");
-        }
-        if (isEmpty(dto.getSendMethod())) {
-            throw new OutboxException("发送方式不能为空");
         }
     }
 

@@ -1,9 +1,10 @@
 package com.wangjg.outbox.scheduler;
 
 import com.wangjg.outbox.config.OutboxProperties;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
@@ -12,14 +13,15 @@ import org.springframework.util.CollectionUtils;
 import java.util.Set;
 
 public class CronSchedule implements InitializingBean,
-        ApplicationContextInitializer<ConfigurableApplicationContext> {
+        ApplicationContextAware {
 
     private final OutboxProperties outboxProperties;
-    private ConfigurableApplicationContext applicationContext;
+    private ApplicationContext applicationContext;
     private final ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
     public CronSchedule(OutboxProperties outboxProperties,
                         ThreadPoolTaskScheduler threadPoolTaskScheduler) {
+
         this.outboxProperties = outboxProperties;
         this.threadPoolTaskScheduler = threadPoolTaskScheduler;
     }
@@ -42,8 +44,9 @@ public class CronSchedule implements InitializingBean,
         threadPoolTaskScheduler.schedule(task, new CronTrigger(outboxProperties.getTaskConfigVal(null, OutboxProperties.TaskProp::getCron)));
     }
 
+
     @Override
-    public void initialize(@NonNull ConfigurableApplicationContext applicationContext) {
+    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
 }

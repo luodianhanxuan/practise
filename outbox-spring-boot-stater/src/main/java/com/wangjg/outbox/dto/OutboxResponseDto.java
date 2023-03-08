@@ -90,17 +90,17 @@ public class OutboxResponseDto implements Serializable {
         private String extend;
 
         public OutboxResponseDto build() {
-            if (isEmpty(this.getSceneType())) {
+            if (isEmpty(getSceneType())) {
                 throw new OutboxException("业务场景不能为空");
             }
-            if (isEmpty(this.getBusinessCode())) {
+            if (isEmpty(getSendMethod())) {
+                throw new OutboxException("发送方式不能为空");
+            }
+            if (isEmpty(getBusinessCode())) {
                 throw new OutboxException("业务代码不能为空");
             }
-            if (isEmpty(this.getRequestId())) {
+            if (isEmpty(getRequestId())) {
                 throw new OutboxException("请求编号不能为空");
-            }
-            if (isEmpty(this.getSendMethod())) {
-                throw new OutboxException("发送方式不能为空");
             }
 
             OutboxResponseDto retVal = new OutboxResponseDto();

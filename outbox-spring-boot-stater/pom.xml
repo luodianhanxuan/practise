@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.wangjg</groupId>
     <artifactId>outbox-spring-boot-stater</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>outbox-spring-boot-stater</name>
     <description>outbox-spring-boot-stater</description>
     <properties>

@@ -6,7 +6,6 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
-import java.time.Period;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -34,7 +33,7 @@ public class OutboxProperties {
 
         // 调度配置
         TaskProp taskProp = new TaskProp();
-        taskProp.setEnable(false);
+        taskProp.setEnable(true);
         taskProp.setJobBatch(50);
         taskProp.setCron("0 0/1 * * * ?");
         taskProp.setEnableSingleTask(true);
@@ -43,6 +42,9 @@ public class OutboxProperties {
         DeliveryProp deliveryProp = new DeliveryProp();
         deliveryProp.setMaxTryTime(10);
         deliveryProp.setRetryInterval(Duration.ofMinutes(30));
+
+        sys.setDelivery(deliveryProp);
+        sys.setTask(taskProp);
         scene.put("sys", sys);
     }
 
@@ -53,7 +55,7 @@ public class OutboxProperties {
         }
         TaskProp sysTask = scene.get("sys").getTask();
 
-        return Objects.isNull(getter.apply(task)) ? getter.apply(sysTask) : getter.apply(task);
+        return Objects.isNull(task) ? getter.apply(sysTask) : getter.apply(task);
     }
 
 
@@ -65,7 +67,7 @@ public class OutboxProperties {
 
         DeliveryProp sysDelivery = scene.get("sys").getDelivery();
 
-        return Objects.isNull(getter.apply(delivery)) ? getter.apply(sysDelivery) : getter.apply(delivery);
+        return Objects.isNull(delivery) ? getter.apply(sysDelivery) : getter.apply(delivery);
     }
 
     public Set<String> getSingletonTaskSceneType() {

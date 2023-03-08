@@ -43,6 +43,3 @@ comment on column OUTBOX.need_receipt is '是否需要消息回执：0 否,1 是
 comment on column OUTBOX.create_at is '记录创建时间';
 comment on column OUTBOX.update_at is '记录更新时间';
 comment on column OUTBOX.extend is '扩展字段';
-
-
-create sequence S_OUTBOX;
