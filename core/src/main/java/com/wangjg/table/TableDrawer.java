@@ -1,7 +1,6 @@
 package com.wangjg.table;
 
 import com.google.common.collect.HashBasedTable;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.*;
@@ -171,7 +170,6 @@ public class TableDrawer {
         Arrays.stream(body).flatMap(Arrays::stream).forEach(consumer);
     }
 
-    @NotNull
     private Cell[][] getBodyArr(int tableRow) {
         Cell[][] bodyArr = new Cell[tableRow][];
         Cell[] tmp;
