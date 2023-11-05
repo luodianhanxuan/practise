@@ -1,0 +1,62 @@
+# &：锚点， {fname}、{lname}： 为锚点定义的别名
+.firstname: &fname
+  firstname: Wang
+.lastname: &lname
+  lastname: JianGuang
+
+.profile: &profile
+  name:
+    # <<：合并到当前位置，*：引用锚点
+    <<: *fname
+    <<: *lname
+  age: 33
+  # 单行 hash
+  contacts: {wife: JYY, sister: WHY, Brother: WWG}
+  # hash
+  education:
+    university: 2010-2014
+    high school: 2006-2010
+    middle school: 2003-2006
+    primary school: 1997-2003
+  # null
+  bad hobbies: ~
+  # 单行数组
+  hobbies: [play games, see films]
+  # 数组
+  skills:
+    - java
+    - python
+    - golang
+his speech:
+  <<: *profile
+  talk about str in yaml:
+    # 字符串默认不使用引号表示
+    normal-style: 字符串
+    # 如果字符串之中包含空格或特殊字符，需要放在引号中
+    special char in str: "内容: 字符串"
+    # 单引号之中如果还有单引号，必须连续使用两个单引号转义
+    single quotes: 'labor''s day'
+    # 字符串可以写成多行，从第二行开始，必须有一个单空格缩进，换行符会被转为空格
+    mul line str1: 我是一段
+      多行
+      字符串
+    # 多行字符串可以使用 | 保留换行符
+    mul line str2: |
+      我是一段
+      多行
+      字符串
+    # 也可以使用 > 折叠换行符
+    mul line str3: >
+      我是一段
+      多行
+      字符串
+    # + 表示保留文字块末尾的换行
+    mul line str4: |+
+      我是一段
+      多行
+      字符串
+    # - 表示删除字符串末尾的换行
+    mul line str5: |-
+      我是一段
+      多行
+      字符串
