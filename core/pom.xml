@@ -121,12 +121,6 @@
             <groupId>com.squareup</groupId>
             <artifactId>javapoet</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>com.wangjg</groupId>
-            <artifactId>processor</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>com.googlecode.lanterna</groupId>
             <artifactId>lanterna</artifactId>

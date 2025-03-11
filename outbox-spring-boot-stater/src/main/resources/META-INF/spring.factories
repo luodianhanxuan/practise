@@ -1,2 +1,2 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.wangjg.outbox.config.OutBoxAutoConfiguration
+#org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+#  com.wangjg.outbox.config.OutBoxAutoConfiguration
