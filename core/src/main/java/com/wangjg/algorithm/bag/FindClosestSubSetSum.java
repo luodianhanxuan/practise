@@ -1,4 +1,4 @@
-package com.wangjg.algorithm.pkg;
+package com.wangjg.algorithm.bag;
 
 import com.google.common.collect.Lists;
 import java.util.*;
@@ -40,22 +40,22 @@ public class FindClosestSubSetSum {
   }
 
   private static Map<Integer, Pair<Boolean, List<Integer>>> getAllSumValueInfo(
-      List<Integer> nums, int bound) {
+          List<Integer> nums, int bound) {
 
-    Map<Integer, Pair<Boolean, List<Integer>>> sumMem = new HashMap<>();
-    sumMem.put(0, Pair.of(true, new ArrayList<>()));
+    Map<Integer, Pair<Boolean, List<Integer>>> allSumValueInfo = new HashMap<>();
+    allSumValueInfo.put(0, Pair.of(true, new ArrayList<>()));
     for (int num : nums) {
-      for (int i = bound; i >= num; i--) {
-        int lastSumValPossible = i - num;
-        if (sumMem.containsKey(lastSumValPossible) && sumMem.get(lastSumValPossible).getLeft()) {
-          List<Integer> lastSumPath = sumMem.get(lastSumValPossible).getRight();
+      for (int newSum = bound; newSum >= num; newSum--) {
+        int existedSumVal = newSum - num;
+        if (allSumValueInfo.containsKey(existedSumVal) && allSumValueInfo.get(existedSumVal).getLeft()) {
+          List<Integer> lastSumPath = allSumValueInfo.get(existedSumVal).getRight();
           List<Integer> sumPath = Lists.newArrayList(lastSumPath);
           sumPath.add(num);
-          sumMem.put(i, Pair.of(true, sumPath));
+          allSumValueInfo.put(newSum, Pair.of(true, sumPath));
         }
       }
     }
-    return sumMem;
+    return allSumValueInfo;
   }
 
   public static void main(String[] args) {
